@@ -65,13 +65,13 @@
             <div class="col-lg-10 col-xl-8 offset-lg-1 offset-xl-2">
                 <div class="intro">
                     <h1 class="text-center">${post.titulo}</h1>
-                    <p class="text-center"><span class="by">by</span> <a href="#">${post.autor.nombre}</a><span class="date">${post.fecha} </span></p>
+                    <p class="text-center"><span class="by">by</span> <a href="#">${post.usuarioByUsuarioId.nombre}</a><span class="date">${post.fecha} </span></p>
                 </div>
                 <div class="text">
                     <p class="text-justify" style="font-size: 18px;">${post.cuerpo}</p>
                     <figure>
                         <figcaption class="text-justify">Tags: <#if post.listaEtiqueta?has_content>
-                            <#list post.listaEtiqueta as etiqueta>
+                            <#list post.etiquetasById as etiqueta>
                                 ${etiqueta.etiqueta},
                             </#list>
                         </#if></figcaption>

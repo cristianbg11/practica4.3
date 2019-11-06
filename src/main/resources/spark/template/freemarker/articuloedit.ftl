@@ -45,10 +45,10 @@
             <form action="/update?id_post=${post.id}" method="POST">
                 <div class="form-group"><label>Titulo</label><input class="form-control" type="text" name="titulo" value="${post.titulo}"></div>
                 <div class="form-group"><label>Cuerpo</label><textarea class="form-control" name="cuerpo">${post.cuerpo}</textarea></div>
-                <div class="form-group"><label>Autor</label><input class="form-control" readonly type="text" name="autor" value="${post.autor.nombre}"></div>
+                <div class="form-group"><label>Autor</label><input class="form-control" readonly type="text" name="autor" value="${post.usuarioByUsuarioId.nombre}"></div>
                 <div class="form-group"><label>Fecha</label><input class="form-control" type="date" name="fecha" value="${post.fecha}"></div>
                 <div class="form-group"><label>Etiqueta</label><input type="text" placeholder="Agrega tags" class="form-control" data-role="tagsinput" data-class="label-info" name="etiqueta"
-                                                                      value=" <#list post.listaEtiqueta as etiqueta>${etiqueta.etiqueta},</#list>"/></div>
+                                                                      value=" <#list post.etiquetasById as etiqueta>${etiqueta.etiqueta},</#list>"/></div>
                 <div class="form-group"><button class="btn btn-primary btn-block" type="submit">Enviar</button></div>
             </form>
         </div>

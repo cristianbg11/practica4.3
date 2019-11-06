@@ -7,13 +7,13 @@ import java.util.Objects;
 @Table(name = "COMENTARIO", schema = "PUBLIC", catalog = "PRACTICA4")
 public class ComentarioEntity {
     private long id;
-    private String comentario;
+    public String comentario;
     private Integer usuarioId;
     private Integer articuloId;
-    private UsuarioEntity usuarioByUsuarioId;
-    private ArticuloEntity articuloByArticuloId;
+    public UsuarioEntity usuarioByUsuarioId;
+    public ArticuloEntity articuloByArticuloId;
 
-    @Id
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
     public long getId() {
         return id;

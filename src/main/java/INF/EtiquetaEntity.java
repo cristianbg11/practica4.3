@@ -7,11 +7,11 @@ import java.util.Objects;
 @Table(name = "ETIQUETA", schema = "PUBLIC", catalog = "PRACTICA4")
 public class EtiquetaEntity {
     private long id;
-    private String etiqueta;
+    public String etiqueta;
     private Integer articuloId;
-    private ArticuloEntity articuloByArticuloId;
+    public ArticuloEntity articuloByArticuloId;
 
-    @Id
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
     public long getId() {
         return id;

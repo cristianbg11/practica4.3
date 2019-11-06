@@ -7,7 +7,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "USUARIO", schema = "PUBLIC", catalog = "PRACTICA4")
 public class UsuarioEntity {
-    private int id;
+    public long id;
     public String username;
     public String password;
     public Boolean administrador;
@@ -16,20 +16,20 @@ public class UsuarioEntity {
     private Collection<ArticuloEntity> articulosById;
     private Collection<ComentarioEntity> comentariosById;
 
-    public UsuarioEntity(int i, String admin, String s, boolean b, boolean b1, String cristian) {
+    public UsuarioEntity(long i, String admin, String s, boolean b, boolean b1, String cristian) {
     }
 
     public UsuarioEntity() {
 
     }
 
-    @Id
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

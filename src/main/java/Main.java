@@ -1,3 +1,6 @@
+import INF.ArticuloEntity;
+import INF.ComentarioEntity;
+import INF.EtiquetaEntity;
 import INF.UsuarioEntity;
 import org.hibernate.HibernateException;
 import org.hibernate.Metamodel;
@@ -18,6 +21,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -50,20 +54,21 @@ public class Main {
         port(8080);
         staticFiles.location("/publico");
         EntityManager em = getSession();
-
-        if (sesion.find(UsuarioEntity.class, 1)==null){
+        long num = 1;
+        if (sesion.find(UsuarioEntity.class, num)==null){
             em.getTransaction().begin();
             UsuarioEntity admin = new UsuarioEntity(1, "admin", "1234", true, true, "Cristian");
             em.persist(admin);
             em.getTransaction().commit();;
         }
         post("/insertar", (request, response) -> {
+            em.getTransaction().begin();
             UsuarioEntity usuario = new UsuarioEntity();
             usuario.username = request.queryParams("username");
             usuario.nombre = request.queryParams("nombre");
             usuario.password = request.queryParams("password");
             usuario.administrador = Boolean.parseBoolean(request.queryParams("administrador"));
-            usuario.autor = Boolean.parseBoolean(request.queryParams("username"));
+            usuario.autor = Boolean.parseBoolean(request.queryParams("autor"));
             em.persist(usuario);
             em.getTransaction().commit();
             response.redirect("/");
@@ -72,99 +77,88 @@ public class Main {
 
         post("/crear-articulo", (request, response)-> {
             spark.Session session=request.session(true);
-            Usuario usuario = (Usuario)(session.attribute("usuario"));
-            Articulo articulo = new Articulo();
-            Etiqueta etiqueta = new Etiqueta();
+            UsuarioEntity usuario = (UsuarioEntity)(session.attribute("usuario"));
+            em.getTransaction().begin();
+            ArticuloEntity articulo = new ArticuloEntity();
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
             articulo.titulo = request.queryParams("titulo");
             articulo.cuerpo = request.queryParams("cuerpo");
-            articulo.autor = usuario;
-            articulo.fecha = format.parse(request.queryParams("fecha"));
-            jpa.insertArticulo(articulo);
-            //List <Articulo> articulos = articulo.getAllArticles();
-            //etiqueta.etiqueta = request.queryParams("etiqueta");
+            articulo.usuarioByUsuarioId = usuario;
+            articulo.fecha = (Date) format.parse(request.queryParams("fecha"));
+            em.persist(articulo);
+            em.getTransaction().commit();
             String[] tags = request.queryParams("etiqueta").split(",");
             List<String> tagList = Arrays.asList(tags);
-            //etiqueta.articulo.id = articulo.getLastArticle();
-            //etiqueta.articulo = articulos.get(articulos.size()-1);
-            etiqueta.articulo_id = jpa.getLastArticle();
-            jpa.insertEtiqueta(etiqueta, tagList, tagList.size());
+            for (int i=0; i<tagList.size(); i++){
+                em.getTransaction().begin();
+                EtiquetaEntity etiqueta = new EtiquetaEntity();
+                etiqueta.etiqueta = tagList.get(i);
+                etiqueta.articuloByArticuloId = articulo;
+                em.persist(etiqueta);
+                em.getTransaction().commit();
+            }
             response.redirect("/index");
             return "Articulo Creado";
         });
 
         get("/delete", (request, response)-> {
             int id_articulo = Integer.parseInt(request.queryParams("id_post"));
-            jpa.deleteArticulo(id_articulo);
+            ArticuloEntity articulo = sesion.find(ArticuloEntity.class, id_articulo);
+            em.getTransaction().begin();
+            em.remove(articulo);
+            em.getTransaction().commit();
             response.redirect("/articulo");
             return "Articulo Borrado";
-        });
-
-        post("/update", (request, response)-> {
-            Articulo articulo = new Articulo();
-            Etiqueta etiqueta = new Etiqueta();
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            articulo.titulo = request.queryParams("titulo");
-            articulo.cuerpo = request.queryParams("cuerpo");
-            articulo.fecha = format.parse(request.queryParams("fecha"));
-            int id_articulo = Integer.parseInt(request.queryParams("id_post"));
-            jpa.editArticulo(id_articulo, articulo);
-            jpa.deleteEtiqueta(id_articulo);
-            String[] tags = request.queryParams("etiqueta").split(",");
-            List<String> tagList = Arrays.asList(tags);
-            etiqueta.articulo_id = id_articulo;
-            jpa.insertEtiqueta(etiqueta, tagList, tagList.size());
-            response.redirect("/post?id_post="+id_articulo);
-            return "Articulo Actualizado";
         });
 
         get("/", (request, response)-> {
             //response.redirect("/login.html");
             if (request.cookie("CookieUsuario") != null){
-                //String id = request.cookie("CookieUsuario");
-                List<Usuario> usuario = jpa.getUser(1);
+                long id = Long.parseLong(request.cookie("CookieUsuario"));
+                UsuarioEntity usuarioEntity = sesion.find(UsuarioEntity.class, id);
                 spark.Session session=request.session(true);
-                session.attribute("usuario", usuario.get(0));
+                session.attribute("usuario", usuarioEntity);
                 response.redirect("/index");
             }
             return renderContent("publico/login.html");
         });
 
-        get("/edita", (request, response)-> {
+        get("/index", (request, response)-> {
             Map<String, Object> attributes = new HashMap<>();
             spark.Session session=request.session(true);
-            Usuario usuario = (Usuario)(session.attribute("usuario"));
+            UsuarioEntity usuario = (UsuarioEntity)(session.attribute("usuario"));
             if(usuario==null){
                 response.redirect("/");
             } else if (usuario.administrador==false){
                 response.redirect("/index");
             }
-            int id = Integer.parseInt(request.queryParams("id_post"))-1;
-            List<Articulo> articulos = jpa.getArticle(id);
+            List<ArticuloEntity> articulos = em.createQuery("select a from ArticuloEntity a order by id desc", ArticuloEntity.class).getResultList();
             attributes.put("usuario",usuario);
-            attributes.put("post",articulos.get(0));
-            return new ModelAndView(attributes, "articuloedit.ftl");
+            attributes.put("articulos",articulos);
+            return new ModelAndView(attributes, "index.ftl");
 
         } , new FreeMarkerEngine());
 
         post("/sesion", (request, response)-> {
-            List<Usuario> users = jpa.getAllUsers();
+            List<UsuarioEntity> users = em.createQuery("select u from UsuarioEntity u", UsuarioEntity.class).getResultList();
             String username = request.queryParams("user");
             String password = request.queryParams("pass");
             spark.Session session=request.session(true);
 
-            for(Usuario usuario : users){
+            for(UsuarioEntity usuario : users){
                 if (usuario.username.equals(username) && usuario.password.equals(password)){
                     session.attribute("usuario", usuario);
                     if (request.queryParams("recordatorio") !=null && request.queryParams("recordatorio").equals("si") ){
                         Map<String, String> cookies=request.cookies();
-                        //response.cookie("/", "CookieUsuario", String.valueOf(usuario.id), 604800, true);
+                        response.cookie("/", "CookieUsuario", String.valueOf(usuario.id), 604800, true);
+                        /*
                         for (String key : cookies.keySet()) {
                             if (key != null) {
                                 response.removeCookie(key);
                                 response.cookie("/", "CookieUsuario", cookies.get(key), 604800, false);
                             }
                         }
+                        */
                     }
                     response.redirect("/index");
                 }
@@ -173,25 +167,65 @@ public class Main {
             return 0;
         });
 
-
-        get("/index", (request, response)-> {
-            Map<String, Object> attributes = new HashMap<>();
+        get("/post", (request, response)-> {
             spark.Session session=request.session(true);
-            Usuario usuario = (Usuario)(session.attribute("usuario"));
+            UsuarioEntity usuario = (UsuarioEntity)(session.attribute("usuario"));
             if(usuario==null){
                 response.redirect("/");
             } else if (usuario.administrador==false){
                 response.redirect("/index");
             }
-            List<Articulo> articulos = jpa.getLastArticles();
+            long id = Integer.parseInt(request.queryParams("id_post"))-1;
+            ArticuloEntity articulo = sesion.find(ArticuloEntity.class, id);
+            Map<String, Object> attributes = new HashMap<>();
+            attributes.put("usuario", usuario);
+            attributes.put("post", articulo);
+            return new ModelAndView(attributes, "post.ftl");
+
+        } , new FreeMarkerEngine());
+
+        post("/update", (request, response)-> {
+            long id_articulo = Integer.parseInt(request.queryParams("id_post"));
+            ArticuloEntity articulo = sesion.find(ArticuloEntity.class, id_articulo);
+            em.getTransaction().begin();
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            articulo.titulo = request.queryParams("titulo");
+            articulo.cuerpo = request.queryParams("cuerpo");
+            articulo.fecha = (Date) format.parse(request.queryParams("fecha"));
+            em.getTransaction().commit();
+            em.createQuery("delete EtiquetaEntity where articuloByArticuloId="+id_articulo).executeUpdate();
+            String[] tags = request.queryParams("etiqueta").split(",");
+            List<String> tagList = Arrays.asList(tags);
+            for (int i=0; i<tagList.size(); i++){
+                em.getTransaction().begin();
+                EtiquetaEntity etiqueta = new EtiquetaEntity();
+                etiqueta.etiqueta = tagList.get(i);
+                etiqueta.articuloByArticuloId = articulo;
+                em.persist(etiqueta);
+                em.getTransaction().commit();
+            }
+            response.redirect("/post?id_post="+id_articulo);
+            return "Articulo Actualizado";
+        });
+
+        get("/edita", (request, response)-> {
+            Map<String, Object> attributes = new HashMap<>();
+            spark.Session session=request.session(true);
+            UsuarioEntity usuario = (UsuarioEntity)(session.attribute("usuario"));
+            if(usuario==null){
+                response.redirect("/");
+            } else if (usuario.administrador==false){
+                response.redirect("/index");
+            }
+            long id = Integer.parseInt(request.queryParams("id_post"))-1;
+            ArticuloEntity articulo = sesion.find(ArticuloEntity.class, id);
             attributes.put("usuario",usuario);
-            attributes.put("articulos",articulos);
-            return new ModelAndView(attributes, "index.ftl");
+            attributes.put("post",articulo);
+            return new ModelAndView(attributes, "articuloedit.ftl");
 
         } , new FreeMarkerEngine());
 
         get("/salir", (request, response)->{
-            //creando cookie en para un minuto
             spark.Session session=request.session(true);
             session.invalidate();
             response.removeCookie("CookieUsuario");
@@ -201,14 +235,14 @@ public class Main {
 
         get("/user", (request, response)-> {
             spark.Session session=request.session(true);
-            Usuario usuario = (Usuario)(session.attribute("usuario"));
+            UsuarioEntity usuario = (UsuarioEntity)(session.attribute("usuario"));
             if(usuario==null){
                 response.redirect("/");
             } else if (usuario.administrador==false){
                 response.redirect("/index");
             }
             Map<String, Object> attributes = new HashMap<>();
-            List<Usuario> users = jpa.getAllUsers();
+            List<UsuarioEntity> users = em.createQuery("select u from UsuarioEntity u").getResultList();
             attributes.put("users",users);
             attributes.put("usuario",usuario);
             return new ModelAndView(attributes, "usuarios.ftl");
@@ -218,40 +252,23 @@ public class Main {
         get("/articulo", (request, response)-> {
             Map<String, Object> attributes = new HashMap<>();
             spark.Session session=request.session(true);
-            Usuario usuario = (Usuario)(session.attribute("usuario"));
+            UsuarioEntity usuario = (UsuarioEntity)(session.attribute("usuario"));
             if(usuario==null){
                 response.redirect("/");
             } else if (usuario.administrador==false){
                 response.redirect("/index");
             }
-            List<Articulo> articulos = jpa.getAllArticles();
+            List<ArticuloEntity> articulos = em.createQuery("select a from ArticuloEntity a").getResultList();
             attributes.put("usuario",usuario);
             attributes.put("articulos",articulos);
             return new ModelAndView(attributes, "articulos.ftl");
 
         } , new FreeMarkerEngine());
 
-        get("/post", (request, response)-> {
-            spark.Session session=request.session(true);
-            Usuario usuario = (Usuario)(session.attribute("usuario"));
-            if(usuario==null){
-                response.redirect("/");
-            } else if (usuario.administrador==false){
-                response.redirect("/index");
-            }
-            int id = Integer.parseInt(request.queryParams("id_post"))-1;
-            List<Articulo> articulos = jpa.getArticle(id);
-            Map<String, Object> attributes = new HashMap<>();
-            attributes.put("usuario",usuario);
-            attributes.put("post",articulos.get(0));
-            return new ModelAndView(attributes, "post.ftl");
-
-        } , new FreeMarkerEngine());
-
         get("/crear", (request, response)-> {
             Map<String, Object> attributes = new HashMap<>();
             spark.Session session=request.session(true);
-            Usuario usuario = (Usuario)(session.attribute("usuario"));
+            UsuarioEntity usuario = (UsuarioEntity)(session.attribute("usuario"));
             if(usuario==null){
                 response.redirect("/");
             } else if (usuario.administrador==false){
@@ -264,13 +281,15 @@ public class Main {
 
         post("/comentar", (request, response) -> {
             spark.Session session=request.session(true);
-            Usuario usuario = (Usuario)(session.attribute("usuario"));
-            Comentario comentario = new Comentario();
+            UsuarioEntity usuario = (UsuarioEntity)(session.attribute("usuario"));
+            ComentarioEntity comentario = new ComentarioEntity();
+            em.getTransaction().begin();
             comentario.comentario = request.queryParams("comentario");
-            comentario.autor = usuario;
-            comentario.articulo_id = Integer.parseInt(request.queryParams("articulo_id"));
-            jpa.insertComentario(comentario);
-            response.redirect("/post?id_post="+(comentario.articulo_id));
+            comentario.usuarioByUsuarioId = usuario;
+            comentario.articuloByArticuloId = sesion.find(ArticuloEntity.class, Integer.parseInt(request.queryParams("articulo_id")));
+            em.persist(comentario);
+            em.getTransaction().commit();
+            response.redirect("/post?id_post="+(comentario.articuloByArticuloId.id));
             return "Comentario Creado";
         });
 

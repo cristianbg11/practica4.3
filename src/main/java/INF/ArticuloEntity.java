@@ -8,16 +8,16 @@ import java.util.Objects;
 @Entity
 @Table(name = "ARTICULO", schema = "PUBLIC", catalog = "PRACTICA4")
 public class ArticuloEntity {
-    private long id;
-    private String titulo;
-    private String cuerpo;
-    private Integer usuarioId;
-    private Date fecha;
-    private UsuarioEntity usuarioByUsuarioId;
+    public long id;
+    public String titulo;
+    public String cuerpo;
+    public Integer usuarioId;
+    public Date fecha;
+    public UsuarioEntity usuarioByUsuarioId;
     private Collection<ComentarioEntity> comentariosById;
     private Collection<EtiquetaEntity> etiquetasById;
 
-    @Id
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
     public long getId() {
         return id;
