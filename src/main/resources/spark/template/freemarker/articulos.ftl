@@ -70,7 +70,7 @@
                     <tr>
                         <td class="d-lg-flex">${articulo.titulo}</td>
                         <td>${articulo.cuerpo[0..100]}</td>
-                        <td>${articulo.autor.nombre}</td>
+                        <td>${articulo.usuarioByUsuarioId.nombre}</td>
                         <td>${articulo.fecha}</td>
                         <td>
                             <div class="dropdown"><button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false" type="button">Opcion&nbsp;</button>

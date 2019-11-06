@@ -79,9 +79,9 @@
                 </div>
                 <h5 class="text-justify" style="padding-top: 5px;margin-bottom: 0px;">Comentarios</h5>
                 <div class="row survey-comment">
-                    <#if post.listaComentario?has_content>
-                        <#list post.listaComentario as comentario>
-                            <div class="col col-9 col-md-10 survey-comment__text"><strong class="survey-comment__author-name">${comentario.autor.username}</strong>
+                    <#if post.comentariosById?has_content>
+                        <#list post.comentariosById as comentario>
+                            <div class="col col-9 col-md-10 survey-comment__text"><strong class="survey-comment__author-name">${comentario.usuarioByUsuarioId.username}</strong>
                                 <div class="survey-comment__text-content">
                                     <p class="text-justify text-secondary" style="font-size: 14px;">${comentario.comentario}<br></p>
                                 </div><div class="survey-comment__date-time">

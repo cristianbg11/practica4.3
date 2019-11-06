@@ -84,7 +84,7 @@ public class ArticuloEntity {
         this.usuarioByUsuarioId = usuarioByUsuarioId;
     }
 
-    @OneToMany(mappedBy = "articuloByArticuloId")
+    @OneToMany(mappedBy = "articuloByArticuloId", cascade = CascadeType.ALL)
     public Collection<ComentarioEntity> getComentariosById() {
         return comentariosById;
     }
@@ -93,7 +93,7 @@ public class ArticuloEntity {
         this.comentariosById = comentariosById;
     }
 
-    @OneToMany(mappedBy = "articuloByArticuloId")
+    @OneToMany(mappedBy = "articuloByArticuloId", cascade = CascadeType.ALL)
     public Collection<EtiquetaEntity> getEtiquetasById() {
         return etiquetasById;
     }

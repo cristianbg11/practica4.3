@@ -102,8 +102,10 @@ public class Main {
         });
 
         get("/delete", (request, response)-> {
-            int id_articulo = Integer.parseInt(request.queryParams("id_post"));
+            long id_articulo = Integer.parseInt(request.queryParams("id_post"));
             ArticuloEntity articulo = sesion.find(ArticuloEntity.class, id_articulo);
+            //em.createQuery("delete EtiquetaEntity where articuloByArticuloId.id="+id_articulo).executeUpdate();
+            //em.createQuery("delete ComentarioEntity where articuloByArticuloId.id="+id_articulo).executeUpdate();
             em.getTransaction().begin();
             em.remove(articulo);
             em.getTransaction().commit();
@@ -175,7 +177,7 @@ public class Main {
             } else if (usuario.administrador==false){
                 response.redirect("/index");
             }
-            long id = Integer.parseInt(request.queryParams("id_post"))-1;
+            long id = Integer.parseInt(request.queryParams("id_post"));
             ArticuloEntity articulo = sesion.find(ArticuloEntity.class, id);
             Map<String, Object> attributes = new HashMap<>();
             attributes.put("usuario", usuario);
@@ -193,7 +195,7 @@ public class Main {
             articulo.cuerpo = request.queryParams("cuerpo");
             articulo.fecha = (Date) format.parse(request.queryParams("fecha"));
             em.getTransaction().commit();
-            em.createQuery("delete EtiquetaEntity where articuloByArticuloId="+id_articulo).executeUpdate();
+            em.createQuery("delete EtiquetaEntity where articuloByArticuloId.id="+id_articulo).executeUpdate();
             String[] tags = request.queryParams("etiqueta").split(",");
             List<String> tagList = Arrays.asList(tags);
             for (int i=0; i<tagList.size(); i++){
@@ -217,7 +219,7 @@ public class Main {
             } else if (usuario.administrador==false){
                 response.redirect("/index");
             }
-            long id = Integer.parseInt(request.queryParams("id_post"))-1;
+            long id = Integer.parseInt(request.queryParams("id_post"));
             ArticuloEntity articulo = sesion.find(ArticuloEntity.class, id);
             attributes.put("usuario",usuario);
             attributes.put("post",articulo);
@@ -286,10 +288,11 @@ public class Main {
             em.getTransaction().begin();
             comentario.comentario = request.queryParams("comentario");
             comentario.usuarioByUsuarioId = usuario;
-            comentario.articuloByArticuloId = sesion.find(ArticuloEntity.class, Integer.parseInt(request.queryParams("articulo_id")));
+            long id = Integer.parseInt(request.queryParams("articulo_id"));
+            comentario.articuloByArticuloId = sesion.find(ArticuloEntity.class, id);
             em.persist(comentario);
             em.getTransaction().commit();
-            response.redirect("/post?id_post="+(comentario.articuloByArticuloId.id));
+            response.redirect("/post?id_post="+id);
             return "Comentario Creado";
         });
 
