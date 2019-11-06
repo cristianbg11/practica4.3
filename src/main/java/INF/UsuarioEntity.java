@@ -8,13 +8,20 @@ import java.util.Objects;
 @Table(name = "USUARIO", schema = "PUBLIC", catalog = "PRACTICA4")
 public class UsuarioEntity {
     private int id;
-    private String username;
-    private String password;
-    private Boolean administrador;
-    private Boolean autor;
-    private String nombre;
+    public String username;
+    public String password;
+    public Boolean administrador;
+    public Boolean autor;
+    public String nombre;
     private Collection<ArticuloEntity> articulosById;
     private Collection<ComentarioEntity> comentariosById;
+
+    public UsuarioEntity(int i, String admin, String s, boolean b, boolean b1, String cristian) {
+    }
+
+    public UsuarioEntity() {
+
+    }
 
     @Id
     @Column(name = "ID", nullable = false)
