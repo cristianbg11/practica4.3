@@ -70,7 +70,7 @@
                 <div class="text">
                     <p class="text-justify" style="font-size: 18px;">${post.cuerpo}</p>
                     <figure>
-                        <figcaption class="text-justify">Tags: <#if post.listaEtiqueta?has_content>
+                        <figcaption class="text-justify">Tags: <#if post.etiquetasById?has_content>
                             <#list post.etiquetasById as etiqueta>
                                 ${etiqueta.etiqueta},
                             </#list>

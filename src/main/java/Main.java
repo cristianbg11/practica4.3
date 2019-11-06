@@ -9,6 +9,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import spark.ModelAndView;
+import spark.Request;
 import spark.template.freemarker.FreeMarkerEngine;
 
 import javax.persistence.EntityManager;
@@ -49,13 +50,12 @@ public class Main {
     }
 
     public static void main(final String[] args) throws Exception {
-        final Session sesion = getSession();
-
+        final Session secion = getSession();
         port(8080);
         staticFiles.location("/publico");
         EntityManager em = getSession();
         long num = 1;
-        if (sesion.find(UsuarioEntity.class, num)==null){
+        if (secion.find(UsuarioEntity.class, num)==null){
             em.getTransaction().begin();
             UsuarioEntity admin = new UsuarioEntity(1, "admin", "1234", true, true, "Cristian");
             em.persist(admin);
@@ -80,28 +80,19 @@ public class Main {
             UsuarioEntity usuario = (UsuarioEntity)(session.attribute("usuario"));
             em.getTransaction().begin();
             ArticuloEntity articulo = new ArticuloEntity();
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
             articulo.titulo = request.queryParams("titulo");
             articulo.cuerpo = request.queryParams("cuerpo");
             articulo.usuarioByUsuarioId = usuario;
-            articulo.fecha = (Date) format.parse(request.queryParams("fecha"));
+            articulo.fecha = Date.valueOf(request.queryParams("fecha"));
             em.persist(articulo);
             em.getTransaction().commit();
-            String[] tags = request.queryParams("etiqueta").split(",");
-            List<String> tagList = Arrays.asList(tags);
-            for (int i=0; i<tagList.size(); i++){
-                em.getTransaction().begin();
-                EtiquetaEntity etiqueta = new EtiquetaEntity();
-                etiqueta.etiqueta = tagList.get(i);
-                etiqueta.articuloByArticuloId = articulo;
-                em.persist(etiqueta);
-                em.getTransaction().commit();
-            }
+            etiquetas(em, request, articulo);
             response.redirect("/index");
             return "Articulo Creado";
         });
 
         get("/delete", (request, response)-> {
+            final Session sesion = getSession();
             long id_articulo = Integer.parseInt(request.queryParams("id_post"));
             ArticuloEntity articulo = sesion.find(ArticuloEntity.class, id_articulo);
             //em.createQuery("delete EtiquetaEntity where articuloByArticuloId.id="+id_articulo).executeUpdate();
@@ -115,6 +106,7 @@ public class Main {
 
         get("/", (request, response)-> {
             //response.redirect("/login.html");
+            final Session sesion = getSession();
             if (request.cookie("CookieUsuario") != null){
                 long id = Long.parseLong(request.cookie("CookieUsuario"));
                 UsuarioEntity usuarioEntity = sesion.find(UsuarioEntity.class, id);
@@ -170,6 +162,7 @@ public class Main {
         });
 
         get("/post", (request, response)-> {
+            final Session sesion = getSession();
             spark.Session session=request.session(true);
             UsuarioEntity usuario = (UsuarioEntity)(session.attribute("usuario"));
             if(usuario==null){
@@ -187,30 +180,22 @@ public class Main {
         } , new FreeMarkerEngine());
 
         post("/update", (request, response)-> {
+            final Session sesion = getSession();
             long id_articulo = Integer.parseInt(request.queryParams("id_post"));
             ArticuloEntity articulo = sesion.find(ArticuloEntity.class, id_articulo);
             em.getTransaction().begin();
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
             articulo.titulo = request.queryParams("titulo");
             articulo.cuerpo = request.queryParams("cuerpo");
-            articulo.fecha = (Date) format.parse(request.queryParams("fecha"));
+            articulo.fecha = Date.valueOf(request.queryParams("fecha"));
             em.getTransaction().commit();
             em.createQuery("delete EtiquetaEntity where articuloByArticuloId.id="+id_articulo).executeUpdate();
-            String[] tags = request.queryParams("etiqueta").split(",");
-            List<String> tagList = Arrays.asList(tags);
-            for (int i=0; i<tagList.size(); i++){
-                em.getTransaction().begin();
-                EtiquetaEntity etiqueta = new EtiquetaEntity();
-                etiqueta.etiqueta = tagList.get(i);
-                etiqueta.articuloByArticuloId = articulo;
-                em.persist(etiqueta);
-                em.getTransaction().commit();
-            }
+            etiquetas(em, request, articulo);
             response.redirect("/post?id_post="+id_articulo);
             return "Articulo Actualizado";
         });
 
         get("/edita", (request, response)-> {
+            final Session sesion = getSession();
             Map<String, Object> attributes = new HashMap<>();
             spark.Session session=request.session(true);
             UsuarioEntity usuario = (UsuarioEntity)(session.attribute("usuario"));
@@ -236,6 +221,7 @@ public class Main {
         });
 
         get("/user", (request, response)-> {
+            Map<String, Object> attributes = new HashMap<>();
             spark.Session session=request.session(true);
             UsuarioEntity usuario = (UsuarioEntity)(session.attribute("usuario"));
             if(usuario==null){
@@ -243,7 +229,6 @@ public class Main {
             } else if (usuario.administrador==false){
                 response.redirect("/index");
             }
-            Map<String, Object> attributes = new HashMap<>();
             List<UsuarioEntity> users = em.createQuery("select u from UsuarioEntity u").getResultList();
             attributes.put("users",users);
             attributes.put("usuario",usuario);
@@ -282,6 +267,7 @@ public class Main {
         } , new FreeMarkerEngine());
 
         post("/comentar", (request, response) -> {
+            final Session sesion = getSession();
             spark.Session session=request.session(true);
             UsuarioEntity usuario = (UsuarioEntity)(session.attribute("usuario"));
             ComentarioEntity comentario = new ComentarioEntity();
@@ -312,6 +298,19 @@ public class Main {
             session.close();
         }
         */
+    }
+
+    public static void etiquetas(EntityManager em, Request request, ArticuloEntity articulo) {
+        String[] tags = request.queryParams("etiqueta").split(",");
+        List<String> tagList = Arrays.asList(tags);
+        for (int i=0; i<tagList.size(); i++){
+            em.getTransaction().begin();
+            EtiquetaEntity etiqueta = new EtiquetaEntity();
+            etiqueta.etiqueta = tagList.get(i);
+            etiqueta.articuloByArticuloId = articulo;
+            em.persist(etiqueta);
+            em.getTransaction().commit();
+        }
     }
 
     private static String renderContent(String htmlFile) throws IOException, URISyntaxException {
