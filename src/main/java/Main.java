@@ -121,14 +121,18 @@ public class Main {
             Map<String, Object> attributes = new HashMap<>();
             spark.Session session=request.session(true);
             UsuarioEntity usuario = (UsuarioEntity)(session.attribute("usuario"));
+            String tag = request.queryParams("id_tag");
             if(usuario==null){
                 response.redirect("/");
             } else if (usuario.administrador==false){
                 response.redirect("/index");
             }
             List<ArticuloEntity> articulos = em.createQuery("select a from ArticuloEntity a order by id desc", ArticuloEntity.class).getResultList();
+            List<String> etiquetas = em.createQuery("select distinct e.etiqueta from EtiquetaEntity e", String.class).getResultList();
             attributes.put("usuario",usuario);
             attributes.put("articulos",articulos);
+            attributes.put("etiquetas",etiquetas);
+            attributes.put("tag", tag);
             return new ModelAndView(attributes, "index.ftl");
 
         } , new FreeMarkerEngine());

@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="assets/css/smoothproducts.css">
     <link rel="stylesheet" href="assets/css/Footer-Clean.css">
     <link rel="stylesheet" href="css/jPages.css">
+    <link rel="stylesheet" href="assets/css/Filter.css" />
 </head>
 <body>
 
@@ -58,13 +59,39 @@
         <div class="intro">
             <h2 class="text-center">Ultimos articulos</h2>
         </div>
+        <div class="filter">
+            <form>
+                <select onchange="location = this.options[this.selectedIndex].value;">
+                    <option value="/index">Todos</option>
+                    <#if etiquetas?has_content>
+                        <#list etiquetas as etiqueta>
+                            <option value="/index?id_tag=${etiqueta}">${etiqueta}</option>
+                        </#list>
+                    </#if>
+                </select>
+            </form>
+        </div>
         <div class="cont">
             <div id="itemContainer" class="row articles">
                 <#if articulos?has_content>
                     <#list articulos as articulo>
-                        <div class="col-sm-6 col-md-4 item"><a href="#"></a>
-                            <h3 class="name">${articulo.titulo}</h3>
-                            <p class="description">${articulo.cuerpo[0..70]}</p><a class="action" href="/post?id_post=${articulo.id}"><i class="fa fa-arrow-circle-right"></i></a></div>
+                        <#if tag?has_content>
+                            <#list articulo.etiquetasById as etiqueta>
+                                <#if tag==etiqueta.etiqueta>
+                                    <div class="col-sm-6 col-md-4 item"><a href="#"></a>
+                                        <h3 class="name">${articulo.titulo}</h3>
+                                        <p class="description">${articulo.cuerpo[0..70]}</p>
+                                        <a class="action" href="/post?id_post=${articulo.id}"><i class="fa fa-arrow-circle-right"></i></a>
+                                    </div>
+                                </#if>
+                            </#list>
+                        <#else>
+                            <div class="col-sm-6 col-md-4 item"><a href="#"></a>
+                                <h3 class="name">${articulo.titulo}</h3>
+                                <p class="description">${articulo.cuerpo[0..70]}</p>
+                                <a class="action" href="/post?id_post=${articulo.id}"><i class="fa fa-arrow-circle-right"></i></a>
+                            </div>
+                        </#if>
                     </#list>
                 </#if>
             </div>
@@ -73,6 +100,7 @@
         </div>
     </div>
 </div>
+
 <div class="footer-clean">
     <footer>
     </footer>
