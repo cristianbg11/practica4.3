@@ -70,12 +70,22 @@
                 </div>
                 <div class="text">
                     <p class="text-justify" style="font-size: 18px;">${post.cuerpo}</p>
-                    <button class="like">
-                        <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
-                    </button>
-                    <button class="dislike">
-                        <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
-                    </button>
+                    <a href="/likepost?id_post=${post.id}"><button class="like">
+                            <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                        </button></a>
+                    <label class="text-justify"><#if post.me_gusta?has_content>
+                            ${post.me_gusta}
+                        <#else>
+                            0
+                    </#if></label>
+                    <a href="/dislikepost?id_post=${post.id}"><button class="dislike">
+                            <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
+                        </button></a>
+                    <label class="text-justify"><#if post.dislike?has_content>
+                            ${post.dislike}
+                        <#else>
+                            0
+                        </#if></label>
                     <figure>
                         <figcaption class="text-justify">Tags: <#if post.etiquetasById?has_content>
                             <#list post.etiquetasById as etiqueta>
@@ -91,12 +101,22 @@
                             <div class="col col-9 col-md-10 survey-comment__text"><strong class="survey-comment__author-name">${comentario.usuarioByUsuarioId.username}</strong>
                                 <div class="survey-comment__text-content">
                                     <p class="text-justify text-secondary" style="font-size: 14px;">${comentario.comentario}<br></p>
-                                    <button class="like">
-                                        <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
-                                    </button>
-                                    <button class="dislike">
-                                        <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
-                                    </button>
+                                    <a href="/likecomment?id_post=${comentario.id}"><button class="like">
+                                            <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                                        </button></a>
+                                    <label class="text-justify"><#if comentario.me_gusta?has_content>
+                                            ${comentario.me_gusta}
+                                        <#else>
+                                            0
+                                        </#if></label>
+                                    <a href="/dislikecomment?id_post=${comentario.id}"><button class="dislike">
+                                            <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
+                                        </button></a>
+                                    <label class="text-justify"><#if comentario.dislike?has_content>
+                                            ${comentario.dislike}
+                                        <#else>
+                                            0
+                                        </#if></label>
                                 </div><div class="survey-comment__date-time">
                                     <script>
                                         var mydate = new Date()

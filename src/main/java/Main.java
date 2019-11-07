@@ -108,8 +108,8 @@ public class Main {
             //response.redirect("/login.html");
             final Session sesion = getSession();
             if (request.cookie("CookieUsuario") != null){
-                long id = Long.parseLong(request.cookie("CookieUsuario"));
-                UsuarioEntity usuarioEntity = sesion.find(UsuarioEntity.class, id);
+                //long id = Long.parseLong(request.cookie("CookieUsuario"));
+                UsuarioEntity usuarioEntity = sesion.find(UsuarioEntity.class, 1);
                 spark.Session session=request.session(true);
                 session.attribute("usuario", usuarioEntity);
                 response.redirect("/index");
@@ -148,15 +148,14 @@ public class Main {
                     session.attribute("usuario", usuario);
                     if (request.queryParams("recordatorio") !=null && request.queryParams("recordatorio").equals("si") ){
                         Map<String, String> cookies=request.cookies();
-                        response.cookie("/", "CookieUsuario", String.valueOf(usuario.id), 604800, true);
-                        /*
+                        //response.cookie("/", "CookieUsuario", String.valueOf(usuario.id), 604800, true);
                         for (String key : cookies.keySet()) {
                             if (key != null) {
                                 response.removeCookie(key);
                                 response.cookie("/", "CookieUsuario", cookies.get(key), 604800, false);
                             }
                         }
-                        */
+
                     }
                     response.redirect("/index");
                 }
@@ -291,6 +290,38 @@ public class Main {
             return "Comentario Creado";
         });
 
+        get("/likepost", (request, response) -> {
+            final Session sesion = getSession();
+            long id = Integer.parseInt(request.queryParams("id_post"));
+            ArticuloEntity articulo = sesion.find(ArticuloEntity.class, id);
+            likePost(em, request, articulo);
+            response.redirect("/post?id_post="+id);
+            return "Me gusta";
+        });
+        get("/dislikepost", (request, response) -> {
+            final Session sesion = getSession();
+            long id = Integer.parseInt(request.queryParams("id_post"));
+            ArticuloEntity articulo = sesion.find(ArticuloEntity.class, id);
+            dislikePost(em, request, articulo);
+            response.redirect("/post?id_post="+id);
+            return "No me gusta";
+        });
+        get("/likecomment", (request, response) -> {
+            final Session sesion = getSession();
+            long id = Integer.parseInt(request.queryParams("id_post"));
+            ComentarioEntity comentario = sesion.find(ComentarioEntity.class, id);
+            likeComment(em, request, comentario);
+            response.redirect("/post?id_post="+id);
+            return "Me gusta";
+        });
+        get("/dislikepost", (request, response) -> {
+            final Session sesion = getSession();
+            long id = Integer.parseInt(request.queryParams("id_post"));
+            ComentarioEntity comentario = sesion.find(ComentarioEntity.class, id);
+            dislikeComment(em, request, comentario);
+            response.redirect("/post?id_post="+id);
+            return "No me gusta";
+        });
         /*
         try {
             System.out.println("querying all the managed entities...");
@@ -309,6 +340,68 @@ public class Main {
         */
     }
 
+    public static void likePost(EntityManager em, Request request, ArticuloEntity articulo){
+        if(articulo.me_gusta==null){
+            em.getTransaction().begin();
+            articulo.setMe_gusta(1);
+            em.merge(articulo);
+            em.getTransaction().commit();
+            em.getTransaction().begin();
+        } else{
+            em.getTransaction().begin();
+            articulo.setMe_gusta(articulo.me_gusta+1);
+            em.merge(articulo);
+            em.getTransaction().commit();
+            em.getTransaction().begin();
+        }
+    }
+
+    public static void dislikePost(EntityManager em, Request request, ArticuloEntity articulo){
+        if(articulo.dislike==null){
+            em.getTransaction().begin();
+            articulo.setMe_gusta(1);
+            em.merge(articulo);
+            em.getTransaction().commit();
+            em.getTransaction().begin();
+        } else{
+            em.getTransaction().begin();
+            articulo.setMe_gusta(articulo.dislike+1);
+            em.merge(articulo);
+            em.getTransaction().commit();
+            em.getTransaction().begin();
+        }
+    }
+    public static void likeComment(EntityManager em, Request request, ComentarioEntity comentario){
+        if(comentario.me_gusta==null){
+            em.getTransaction().begin();
+            comentario.setMe_gusta(1);
+            em.merge(comentario);
+            em.getTransaction().commit();
+            em.getTransaction().begin();
+        } else{
+            em.getTransaction().begin();
+            comentario.setMe_gusta(comentario.me_gusta+1);
+            em.merge(comentario);
+            em.getTransaction().commit();
+            em.getTransaction().begin();
+        }
+    }
+
+    public static void dislikeComment(EntityManager em, Request request, ComentarioEntity comentario){
+        if(comentario.dislike==null){
+            em.getTransaction().begin();
+            comentario.setMe_gusta(1);
+            em.merge(comentario);
+            em.getTransaction().commit();
+            em.getTransaction().begin();
+        } else{
+            em.getTransaction().begin();
+            comentario.setMe_gusta(comentario.dislike+1);
+            em.merge(comentario);
+            em.getTransaction().commit();
+            em.getTransaction().begin();
+        }
+    }
     public static void etiquetas(EntityManager em, Request request, ArticuloEntity articulo) {
         String[] tags = request.queryParams("etiqueta").split(",");
         List<String> tagList = Arrays.asList(tags);

@@ -16,6 +16,8 @@ public class ArticuloEntity {
     public UsuarioEntity usuarioByUsuarioId;
     private Collection<ComentarioEntity> comentariosById;
     private Collection<EtiquetaEntity> etiquetasById;
+    public Integer me_gusta;
+    public Integer dislike;
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
@@ -57,6 +59,26 @@ public class ArticuloEntity {
         this.fecha = fecha;
     }
 
+    @Basic
+    @Column(name = "ME_GUSTA", nullable = true)
+    public Integer getMe_gusta() {
+        return me_gusta;
+    }
+
+    public void setMe_gusta(Integer me_gusta) {
+        this.me_gusta = me_gusta;
+    }
+
+    @Basic
+    @Column(name = "DISLIKE", nullable = true)
+    public Integer getDislike() {
+        return dislike;
+    }
+
+    public void setDislike(Integer dislike) {
+        this.dislike = dislike;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -66,7 +88,9 @@ public class ArticuloEntity {
                 Objects.equals(titulo, that.titulo) &&
                 Objects.equals(cuerpo, that.cuerpo) &&
                 Objects.equals(usuarioId, that.usuarioId) &&
-                Objects.equals(fecha, that.fecha);
+                Objects.equals(fecha, that.fecha) &&
+                Objects.equals(me_gusta, that.me_gusta) &&
+                Objects.equals(dislike, that.dislike);
     }
 
     @Override
