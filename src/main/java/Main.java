@@ -97,9 +97,9 @@ public class Main {
             ArticuloEntity articulo = sesion.find(ArticuloEntity.class, id_articulo);
             //em.createQuery("delete EtiquetaEntity where articuloByArticuloId.id="+id_articulo).executeUpdate();
             //em.createQuery("delete ComentarioEntity where articuloByArticuloId.id="+id_articulo).executeUpdate();
-            em.getTransaction().begin();
-            em.remove(articulo);
-            em.getTransaction().commit();
+            sesion.getTransaction().begin();
+            sesion.remove(articulo);
+            sesion.getTransaction().commit();
             response.redirect("/articulo");
             return "Articulo Borrado";
         });

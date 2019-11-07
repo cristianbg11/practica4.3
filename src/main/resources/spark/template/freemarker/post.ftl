@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="assets/css/survey-comment.css">
     <link rel="stylesheet" href="assets/css/text-box.css">
     <link rel="stylesheet" href="assets/css/Footer-Clean.css">
+    <link rel="stylesheet" href="css/button.css">
 </head>
 
 <body>
@@ -69,6 +70,12 @@
                 </div>
                 <div class="text">
                     <p class="text-justify" style="font-size: 18px;">${post.cuerpo}</p>
+                    <button class="like">
+                        <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                    </button>
+                    <button class="dislike">
+                        <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
+                    </button>
                     <figure>
                         <figcaption class="text-justify">Tags: <#if post.etiquetasById?has_content>
                             <#list post.etiquetasById as etiqueta>
@@ -84,6 +91,12 @@
                             <div class="col col-9 col-md-10 survey-comment__text"><strong class="survey-comment__author-name">${comentario.usuarioByUsuarioId.username}</strong>
                                 <div class="survey-comment__text-content">
                                     <p class="text-justify text-secondary" style="font-size: 14px;">${comentario.comentario}<br></p>
+                                    <button class="like">
+                                        <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                                    </button>
+                                    <button class="dislike">
+                                        <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
+                                    </button>
                                 </div><div class="survey-comment__date-time">
                                     <script>
                                         var mydate = new Date()
