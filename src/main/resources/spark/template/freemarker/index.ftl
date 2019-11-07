@@ -62,6 +62,7 @@
         <div class="filter">
             <form>
                 <select onchange="location = this.options[this.selectedIndex].value;">
+                    <option value="/index">Tags</option>
                     <option value="/index">Todos</option>
                     <#if etiquetas?has_content>
                         <#list etiquetas as etiqueta>

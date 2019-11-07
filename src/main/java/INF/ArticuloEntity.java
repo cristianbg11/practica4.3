@@ -8,7 +8,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "ARTICULO", schema = "PUBLIC", catalog = "PRACTICA4")
 public class ArticuloEntity {
-    private long id;
+    public long id;
     public String titulo;
     public String cuerpo;
     public Integer usuarioId;

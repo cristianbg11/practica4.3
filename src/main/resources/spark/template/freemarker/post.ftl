@@ -101,7 +101,7 @@
                             <div class="col col-9 col-md-10 survey-comment__text"><strong class="survey-comment__author-name">${comentario.usuarioByUsuarioId.username}</strong>
                                 <div class="survey-comment__text-content">
                                     <p class="text-justify text-secondary" style="font-size: 14px;">${comentario.comentario}<br></p>
-                                    <a href="/likecomment?id_post=${comentario.id}"><button class="like">
+                                    <a href="/likecomment?id_comment=${comentario.id}"><button class="like">
                                             <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
                                         </button></a>
                                     <label class="text-justify"><#if comentario.me_gusta?has_content>
@@ -109,7 +109,7 @@
                                         <#else>
                                             0
                                         </#if></label>
-                                    <a href="/dislikecomment?id_post=${comentario.id}"><button class="dislike">
+                                    <a href="/dislikecomment?id_comment=${comentario.id}"><button class="dislike">
                                             <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>
                                         </button></a>
                                     <label class="text-justify"><#if comentario.dislike?has_content>

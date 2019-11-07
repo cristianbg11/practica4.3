@@ -308,18 +308,18 @@ public class Main {
         });
         get("/likecomment", (request, response) -> {
             final Session sesion = getSession();
-            long id = Integer.parseInt(request.queryParams("id_post"));
+            long id = Integer.parseInt(request.queryParams("id_comment"));
             ComentarioEntity comentario = sesion.find(ComentarioEntity.class, id);
             likeComment(em, request, comentario);
-            response.redirect("/post?id_post="+id);
+            response.redirect("/post?id_post="+comentario.articuloByArticuloId.id);
             return "Me gusta";
         });
-        get("/dislikepost", (request, response) -> {
+        get("/dislikecomment", (request, response) -> {
             final Session sesion = getSession();
-            long id = Integer.parseInt(request.queryParams("id_post"));
+            long id = Integer.parseInt(request.queryParams("id_comment"));
             ComentarioEntity comentario = sesion.find(ComentarioEntity.class, id);
             dislikeComment(em, request, comentario);
-            response.redirect("/post?id_post="+id);
+            response.redirect("/post?id_post="+comentario.articuloByArticuloId.id);
             return "No me gusta";
         });
         /*
@@ -346,29 +346,25 @@ public class Main {
             articulo.setMe_gusta(1);
             em.merge(articulo);
             em.getTransaction().commit();
-            em.getTransaction().begin();
         } else{
             em.getTransaction().begin();
             articulo.setMe_gusta(articulo.me_gusta+1);
             em.merge(articulo);
             em.getTransaction().commit();
-            em.getTransaction().begin();
         }
     }
 
     public static void dislikePost(EntityManager em, Request request, ArticuloEntity articulo){
         if(articulo.dislike==null){
             em.getTransaction().begin();
-            articulo.setMe_gusta(1);
+            articulo.setDislike(1);
             em.merge(articulo);
             em.getTransaction().commit();
-            em.getTransaction().begin();
         } else{
             em.getTransaction().begin();
-            articulo.setMe_gusta(articulo.dislike+1);
+            articulo.setDislike(articulo.dislike+1);
             em.merge(articulo);
             em.getTransaction().commit();
-            em.getTransaction().begin();
         }
     }
     public static void likeComment(EntityManager em, Request request, ComentarioEntity comentario){
@@ -377,29 +373,25 @@ public class Main {
             comentario.setMe_gusta(1);
             em.merge(comentario);
             em.getTransaction().commit();
-            em.getTransaction().begin();
         } else{
             em.getTransaction().begin();
             comentario.setMe_gusta(comentario.me_gusta+1);
             em.merge(comentario);
             em.getTransaction().commit();
-            em.getTransaction().begin();
         }
     }
 
     public static void dislikeComment(EntityManager em, Request request, ComentarioEntity comentario){
         if(comentario.dislike==null){
             em.getTransaction().begin();
-            comentario.setMe_gusta(1);
+            comentario.setDislike(1);
             em.merge(comentario);
             em.getTransaction().commit();
-            em.getTransaction().begin();
         } else{
             em.getTransaction().begin();
-            comentario.setMe_gusta(comentario.dislike+1);
+            comentario.setDislike(comentario.dislike+1);
             em.merge(comentario);
             em.getTransaction().commit();
-            em.getTransaction().begin();
         }
     }
     public static void etiquetas(EntityManager em, Request request, ArticuloEntity articulo) {
