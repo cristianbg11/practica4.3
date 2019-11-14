@@ -55,12 +55,14 @@ public class Main {
         staticFiles.location("/publico");
         EntityManager em = getSession();
         long num = 1;
+
         if (secion.find(UsuarioEntity.class, num)==null){
             em.getTransaction().begin();
             UsuarioEntity admin = new UsuarioEntity(1, "admin", "1234", true, true, "Cristian");
             em.persist(admin);
             em.getTransaction().commit();;
         }
+
         post("/insertar", (request, response) -> {
             em.getTransaction().begin();
             UsuarioEntity usuario = new UsuarioEntity();
@@ -73,7 +75,7 @@ public class Main {
             em.getTransaction().commit();
             response.redirect("/");
             return "Usuario Creado";
-        });
+        }); // Crea un usuario
 
         post("/crear-articulo", (request, response)-> {
             spark.Session session=request.session(true);
@@ -200,7 +202,7 @@ public class Main {
             etiquetas(em, request, articulo);
             response.redirect("/post?id_post="+id_articulo);
             return "Articulo Actualizado";
-        });
+        }); //Actualiza articulos
 
         get("/edita", (request, response)-> {
             final Session sesion = getSession();
@@ -226,7 +228,7 @@ public class Main {
             response.removeCookie("CookieUsuario");
             response.redirect("/");
             return "Sesion finalizada";
-        });
+        }); //Finaliza Sesión
 
         get("/user", (request, response)-> {
             Map<String, Object> attributes = new HashMap<>();
@@ -242,7 +244,7 @@ public class Main {
             attributes.put("usuario",usuario);
             return new ModelAndView(attributes, "usuarios.ftl");
 
-        } , new FreeMarkerEngine());
+        } , new FreeMarkerEngine()); //Retorna un usuario a buscar
 
         get("/articulo", (request, response)-> {
             Map<String, Object> attributes = new HashMap<>();
@@ -258,7 +260,7 @@ public class Main {
             attributes.put("articulos",articulos);
             return new ModelAndView(attributes, "articulos.ftl");
 
-        } , new FreeMarkerEngine());
+        } , new FreeMarkerEngine()); //Retorna un articulo a buscar.
 
         get("/crear", (request, response)-> {
             Map<String, Object> attributes = new HashMap<>();
@@ -272,7 +274,7 @@ public class Main {
             attributes.put("usuario",usuario);
             return new ModelAndView(attributes, "crear.ftl");
 
-        } , new FreeMarkerEngine());
+        } , new FreeMarkerEngine()); //Crea un usuario
 
         post("/comentar", (request, response) -> {
             final Session sesion = getSession();
@@ -288,7 +290,7 @@ public class Main {
             em.getTransaction().commit();
             response.redirect("/post?id_post="+id);
             return "Comentario Creado";
-        });
+        }); //Crea un comentario en un articulo
 
         get("/likepost", (request, response) -> {
             final Session sesion = getSession();
@@ -297,7 +299,8 @@ public class Main {
             likePost(em, request, articulo);
             response.redirect("/post?id_post="+id);
             return "Me gusta";
-        });
+        }); //le da me gusta en un articulo
+
         get("/dislikepost", (request, response) -> {
             final Session sesion = getSession();
             long id = Integer.parseInt(request.queryParams("id_post"));
@@ -305,7 +308,8 @@ public class Main {
             dislikePost(em, request, articulo);
             response.redirect("/post?id_post="+id);
             return "No me gusta";
-        });
+        }); //le da no me gusta en un articulo
+
         get("/likecomment", (request, response) -> {
             final Session sesion = getSession();
             long id = Integer.parseInt(request.queryParams("id_comment"));
@@ -313,7 +317,8 @@ public class Main {
             likeComment(em, request, comentario);
             response.redirect("/post?id_post="+comentario.articuloByArticuloId.id);
             return "Me gusta";
-        });
+        }); //le da me gusta a un comentario
+
         get("/dislikecomment", (request, response) -> {
             final Session sesion = getSession();
             long id = Integer.parseInt(request.queryParams("id_comment"));
@@ -321,23 +326,8 @@ public class Main {
             dislikeComment(em, request, comentario);
             response.redirect("/post?id_post="+comentario.articuloByArticuloId.id);
             return "No me gusta";
-        });
-        /*
-        try {
-            System.out.println("querying all the managed entities...");
-            final Metamodel metamodel = session.getSessionFactory().getMetamodel();
-            for (EntityType<?> entityType : metamodel.getEntities()) {
-                final String entityName = entityType.getName();
-                final Query query = session.createQuery("from " + entityName);
-                System.out.println("executing: " + query.getQueryString());
-                for (Object o : query.list()) {
-                    System.out.println("  " + o);
-                }
-            }
-        } finally {
-            session.close();
-        }
-        */
+        }); //le da un no me gusta a un comentario
+
     }
 
     public static void likePost(EntityManager em, Request request, ArticuloEntity articulo){
